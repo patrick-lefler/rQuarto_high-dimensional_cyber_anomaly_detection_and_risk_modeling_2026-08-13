@@ -1,4 +1,4 @@
-High-Dimensional Cyber Anomaly Detection & Systemic Risk Modeling
+### High-Dimensional Cyber Anomaly Detection & Systemic Risk Modeling
 
 Integrating Markov Transition Matrices, Deep Autoencoder Reconstruction Loss, and Extreme Value Theory Tail Calibration
 
@@ -6,17 +6,17 @@ Author: Patrick Lefler
 
 Published: 2026-08-12 
 
-Rendered:
+GitHub Link: https://patrick-lefler.github.io/rQuarto_high-dimensional_cyber_anomaly_detection_and_risk_modeling_2026-08-13/
 
-Project Introduction
+### Project Introduction
 
 A pure-R detection engine pairs PageRank structural-risk mapping with an unsupervised autoencoder and Extreme Value Theory thresholds for board-grade cyber monitoring.
 
-Overview
+### Overview
 
 The project layers two independent risk models on enterprise telemetry. A Markov transition matrix maps how requests and dependencies move across services, and a PageRank pass over that graph identifies the single points of failure most likely to produce cascading outages. Separately, an unsupervised autoencoder — built from vectorized matrix calculus and trained with the Adam optimizer, with no external C++ or LibTorch dependency — learns the reconstruction signature of sixteen telemetry features and flags deviation through reconstruction error. Extreme Value Theory, via a Peaks-over-Threshold fit of a Generalized Pareto Distribution to the loss tail, replaces a fixed alert rule with a statistically derived 99.9% boundary. The intended outcome is a monitoring layer decision-makers can trust to isolate real threats without burying the SOC in false positives.
 
-Tech Stack
+### Tech Stack
 Language: R
 Framework: Quarto, tidymodels (recipes, parsnip, workflows, tune, rsample, yardstick) for the evaluation pipeline
 Primary Libraries: tidyverse, evd (Generalized Pareto / EVT fitting), gt, patchwork, scales, sessioninfo
@@ -30,7 +30,7 @@ high-dimensional-cyber-anomaly-detection/
 ├── _brand.yml
 ├── _quarto.yml
 └── index.qmd
-Key Findings
+### Key Findings
 
 Reflects performance against simulated telemetry and controlled attack injection, not live production traffic.
 
@@ -41,7 +41,7 @@ License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-Contact
+### Contact
 
 Patrick Lefler [https://www.linkedin.com/in/patricklefler/] | [patrick-lefler.github.io] | [https://substack.com/@pflefler]
 
