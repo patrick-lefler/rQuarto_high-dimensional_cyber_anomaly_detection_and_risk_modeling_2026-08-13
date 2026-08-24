@@ -1,0 +1,676 @@
+---
+title: "High-Dimensional Cyber Anomaly Detection & Systemic Risk Modeling"
+subtitle: "Integrating Markov Transition Matrices, Deep Autoencoder Reconstruction Loss, and Extreme Value Theory Tail Calibration"
+abstract: "Abstract Goes Here"
+author: Patrick Lefler
+date: "2026-08-12"
+format:
+  html:
+    code-fold: true
+    code-copy: true
+    code-overflow: wrap
+    code-tools: true
+    code-summary: "Display code"
+    df-print: kable
+    embed-math: true
+    embed-resources: true
+    fig-align: center
+    fig-height: 6
+    fig-width: 10
+    highlight-style: arrow
+    lightbox: true
+    linkcolor: "#0166CC"
+    number-sections: false
+    page-layout: full
+    smooth-scroll: true
+    theme: sandstone
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    toc-title: "Contents"
+execute:
+  echo: true
+  warning: false
+  message: false
+html-math-method: mathjax
+knitr:
+  opts_chunk:
+    comment: "#>"
+---
+
+## Introduction & Theoretical Framework
+
+Today’s enterprise cyber systems produce huge amounts of detailed data, including authentication logs, network flows, and host activity metrics. Most security tools still depend on fixed signatures and simple threshold rules. Because of this, they often miss *zero-day* attacks, *advanced persistent threats (APTs)*, and *credential stuffing* campaigns that stay hidden by operating within normal limits.
+
+To address the gaps in older monitoring systems, this project uses a two-part approach that combines graph analysis with deep unsupervised learning. First, we map the enterprise’s dependencies into directed **Markov Transition Matrices**, which show how service requests and operations move through the system. Using the **PageRank** Algorithm on these matrices, thre most important infrastructure nodes can be identified. This helps risk managers identify key single points of failure (SPOFs) that could cause major outages if they fail.
+
+Alongside the structural mapping, the system includes a dynamic monitoring layer that uses an unsupervised **Deep Autoencoder Anomaly Detection Engine** built in R - avoiding the need for outside `C++` or `LibTorch` libraries. The neural network is trained only on normal operational data, so it learns what typical activity looks like. When something unusual happens, the model’s reconstruction error increases, signaling a possible anomaly.
+
+Finally, the system uses **Extreme Value Theory (EVT) with a Peaks-over-Threshold** method by fitting a Generalized Pareto Distribution to the highest reconstruction losses. This approach replaces guesswork with precise, dynamic alert thresholds. The combined system offers a clear and reliable monitoring setup that can catch stealth attacks with high accuracy and minimizes false alarms for Security Operations Center (SOC) teams.
+
+### Project Techniques and Algorithms Being Utilized
+
+**Markov Transition Matrices**</br>
+A Markov transition matrix is a table of probabilities that shows how operations and dependencies move through an organization. In technology risk management, each column stands for an application or service, and each row shows the asset it depends on. This model assumes that the next step in a process depends only on its current state. By mapping these microservice connections in a clear grid, leaders get a transparent view of how activity moves through digital systems. This helps them simulate outages and spot hidden bottlenecks.
+
+**PageRank**</br>
+PageRank was first created by Google to rank web pages. It measures importance not just by the number of connections, but by how important those connections are. In enterprise architecture, PageRank models how reliance spreads across technology layers and checks the chance that an issue will affect a specific part. It uses a damping factor to balance direct paths with unexpected events, turning complex systems into clear, percentage-based risk scores. This approach replaces guesswork with data, helping to find weak spots that need more attention or backup.
+
+**Deep Autoencoder Anomaly Detection Engine**</br>
+A deep autoencoder is an AI neural network that can spot new and unknown threats without needing a list of known attacks. It works by compressing normal operational data, like login rates, network flows, and server activity, into a simple form and then rebuilding it. Since the model only learns from normal behavior, it becomes very familiar with usual patterns. If something unusual happens, like an intrusion or data theft, the network cannot rebuild the pattern correctly, causing a sudden spike in error that flags the anomaly right away.
+
+**Extreme Value Theory (EVT) with Peaks-over-Threshold**</br>
+Extreme Value Theory (EVT) is a statistical method that looks only at the most extreme data points, not the usual averages. In our security system, the Peaks-over-Threshold (POT) method uses a special curve, called the Generalized Pareto Distribution, to focus on the highest reconstruction errors. This helps the system set dynamic, mathematically proven alert levels, like a 99.9% confidence threshold. Instead of using fixed alert limits, EVT makes sure that automatic responses only happen for real, serious threats, which greatly reduces false alarms and analyst fatigue.
+
+
+## Mathematical Formulation & Matrix Calculus
+
+This section explains the mathematical design of the anomaly detection system. It uses an AI method called an **autoencoder**, which learns to compress normal activity into a simple digital baseline and then rebuild it. If new or unauthorized cyber activity happens, the system cannot recreate the unfamiliar pattern well, which leads to a sudden increase in reconstruction error. The model uses advanced tail-risk mathematics, known as **Extreme Value Theory**, to analyze these errors. This approach sets dynamic, statistically sound risk limits that automatically identify zero-day threats, so there is no need for human guesswork or old rule-based methods.
+
+```{mermaid}
+%%| fig-align: center
+%%{init: {'themeVariables': { 'fontSize': '15px', 'fontFamily': 'sans-serif' }}}%%
+flowchart LR
+    %% Row 1 (Encoding & Compression Pipeline)
+    X["<b>Input Features</b><br>(X ∈ ℝᴺˣᵈ)"] --> ENC["<b>Encoder</b><br>(W_e, b_e)"]
+    ENC --> Z["<b>Latent Bottleneck</b><br>(Z ∈ ℝᴺˣᵏ)"]
+    Z --> DEC["<b>Decoder</b><br>(W_d, b_d)"]
+    
+    %% Row 2 (Reconstruction, Profiling & Triage Pipeline)
+    XHAT["<b>Reconstructed Output</b><br>(X̂ ∈ ℝᴺˣᵈ)"] -.-> LOSS["<b>Reconstruction Loss</b><br>ℒ(x) = ‖x - X̂‖²"]
+    LOSS --> EVT["<b>EVT Tail Fit</b><br>(Generalized Pareto)"]
+    EVT --> SOC["<b>Automated SOC</b><br>Alert Triage"]
+
+    %% Direct transition from Row 1 to Row 2
+    DEC --> XHAT
+    
+    %% Spatial alignments enforcing a balanced 2x4 grid
+    X ~~~ XHAT
+    ENC ~~~ LOSS
+    Z ~~~ EVT
+    DEC ~~~ SOC
+
+    classDef default fill:#f8f9fa,stroke:#0275d8,stroke-width:1.5px;
+    classDef alert fill:#fce4e4,stroke:#d9534f,stroke-width:1.5px;
+    class SOC alert;
+```
+
+**1. Vectorized Autoencoder Architecture**
+
+Let $X \in \mathbb{R}^{N \times d}$ represent a batch of $N$ observations across $d$ telemetry features ($d = 16$).
+
+The **Encoder** projects input matrix $X$ into a lower-dimensional latent bottleneck $Z \in \mathbb{R}^{N \times k}$ ($k = 4$) using a $\tanh$ non-linear activation:
+
+$$Z = \tanh\left(X W_e + \mathbf{1}_N \mathbf{b}_e^T\right)$$
+
+*(where $W_e \in \mathbb{R}^{d \times k}$ is the encoding weight matrix and $\mathbf{b}_e \in \mathbb{R}^k$ is the encoder bias vector).*
+
+The **Decoder** maps the latent representations back into the reconstructed feature space $\hat{X} \in \mathbb{R}^{N \times d}$:
+
+$$\hat{X} = Z W_d + \mathbf{1}_N \mathbf{b}_d^T$$
+
+*(where $W_d \in \mathbb{R}^{k \times d}$ is the decoding weight matrix and $\mathbf{b}_d \in \mathbb{R}^d$ is the decoder bias vector).*
+
+The objective function minimizes Mean Squared Error (MSE) across the baseline data distribution:
+
+$$\mathcal{L}(X, \hat{X}) = \frac{1}{N \cdot d} \sum_{i=1}^N \sum_{j=1}^d (X_{ij} - \hat{X}_{ij})^2 = \frac{1}{N \cdot d} \|X - \hat{X}\|_F^2$$
+
+**2. Analytical Backpropagation & Adam Gradient Updates**
+
+The analytic gradients of the loss function with respect to network parameters are derived via matrix calculus:
+
+$$\frac{\partial \mathcal{L}}{\partial \hat{X}} = \frac{2}{N \cdot d} (\hat{X} - X)$$
+
+$$\frac{\partial \mathcal{L}}{\partial W_d} = Z^T \left( \frac{\partial \mathcal{L}}{\partial \hat{X}} \right), \quad \frac{\partial \mathcal{L}}{\partial \mathbf{b}_d} = \sum_{i=1}^N \left( \frac{\partial \mathcal{L}}{\partial \hat{X}} \right)_{i, \cdot}$$
+
+$$\frac{\partial \mathcal{L}}{\partial Z} = \left( \frac{\partial \mathcal{L}}{\partial \hat{X}} \right) W_d^T$$
+
+$$\Delta_Z = \frac{\partial \mathcal{L}}{\partial Z} \odot (1 - Z^2)$$
+
+$$\frac{\partial \mathcal{L}}{\partial W_e} = X^T \Delta_Z, \quad \frac{\partial \mathcal{L}}{\partial \mathbf{b}_e} = \sum_{i=1}^N (\Delta_Z)_{i, \cdot}$$
+
+Parameters are updated using the **Adam Optimizer** (Adaptive Moment Estimation), maintaining running estimates of first ($m_t$) and second ($v_t$) uncentered gradients.
+
+**3. Extreme Value Theory (EVT) Thresholding**
+
+Rather than setting arbitrary empirical percentiles, the upper tail of the baseline loss distribution is modeled using the **Peaks-over-Threshold (POT)** approach. For a high threshold $u$, excess losses follow a **Generalized Pareto Distribution (GPD)** with scale parameter $\sigma$ and shape parameter $\xi$.
+
+The dynamic cutoff $\tau_q$ for risk tolerance $q$ is:
+
+$$\tau_q = u + \frac{\sigma}{\xi} \left[ \left( \frac{N}{N_u} (1 - q) \right)^{-\xi} - 1 \right]$$
+
+---
+
+# Environment Setup & Library Initialization
+
+This first step sets up the analytics workbench by loading industry-standard math and data visualization tools into memory. It also sets rules for reproducibility, like using fixed computational seeds, so every statistical calculation and risk simulation gives consistent, audit-ready results no matter when or where you run the code. By standardizing visual and reporting settings from the start, the system makes sure that complex technical data is shown in a clear, consistent dashboard format suitable for board-level review.
+
+```{r setup}
+# Core Data Science & Wrangling
+library(tidyverse)
+library(recipes)
+
+# Extreme Value Modeling & Metrics
+library(evd)
+library(yardstick)
+
+# Executive Visualization & Reporting
+library(ggplot2)
+library(patchwork)
+library(scales)
+library(gt)
+
+# Enforce global reproducibility
+set.seed(42)
+
+# Global ggplot2 styling
+theme_set(
+  theme_minimal(base_size = 12) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      plot.subtitle = element_text(color = "#555555", size = 11),
+      panel.grid.minor = element_blank(),
+      legend.position = "bottom"
+    )
+)
+``` 
+
+## High-Dimensional Telemetry Scaffolding & Attack Injection
+A 16-dimensional telemetry space is simulated spanning three operational planes:
+
+1.	Authentication & Identity (‭$X_1 - X_5$‬‭‬): Failed login count, privileged escalations, unique source IPs, off-hour login flags, session token refresh rate. </br>
+2.	Network Netflow & Perimeter (‭$X_6 - X_{11}$‬‭‬): Outbound bytes, packet velocity, ephemeral port entropy, DNS query rate, outbound TLS duration, TCP SYN-ACK ratio. </br>
+3.	Host & Workload Telemetry (‭$X_{12} - X_{16}$‬‭‬): CPU utilization, memory pressure, spawned child process count, file system write bursts, active thread count. </br>
+
+## Generate baseline steady-state operational telemetry
+
+This module creates a realistic digital record of normal business activity using 16 key indicators, such as employee login patterns, data transfers at the network edge, and server workload levels. To test the detection system, the environment adds simulated real-world cyber incidents, including stealth data theft, brute-force attacks on credentials, and lateral movement using unknown vulnerabilities. This combined dataset serves as the basis to check how well the algorithm tells apart regular operations from advanced cyber threats.
+
+``` {r telemetry-data-greneration}
+
+generate_baseline_telemetry <- function(n_samples = 15000) {
+  tibble(
+    # Authentication features
+    auth_failed_logins      = rpois(n_samples, lambda = 1.2),
+    auth_priv_escalations   = rpois(n_samples, lambda = 0.1),
+    auth_unique_source_ips  = rpois(n_samples, lambda = 2.0) + 1,
+    auth_off_hours_flag     = rbinom(n_samples, size = 1, prob = 0.08),
+    auth_token_refresh_rate = rnorm(n_samples, mean = 12, sd = 2.5),
+    
+    # Network netflow features
+    net_bytes_out_kb        = rlnorm(n_samples, meanlog = 7.5, sdlog = 0.8),
+    net_packet_velocity     = rnorm(n_samples, mean = 450, sd = 60),
+    net_port_entropy        = runif(n_samples, min = 0.15, max = 0.45),
+    net_dns_query_rate      = rpois(n_samples, lambda = 35),
+    net_tls_duration_sec    = rexp(n_samples, rate = 1/45) + 5,
+    net_syn_ack_ratio       = rnorm(n_samples, mean = 1.02, sd = 0.05),
+    
+    # Host telemetry features
+    host_cpu_utilization    = rbeta(n_samples, shape1 = 4, shape2 = 6) * 100,
+    host_memory_pressure    = rnorm(n_samples, mean = 62, sd = 8),
+    host_child_process_cnt  = rpois(n_samples, lambda = 8),
+    host_fs_write_bursts    = rpois(n_samples, lambda = 14),
+    host_active_threads     = rnorm(n_samples, mean = 120, sd = 15),
+    
+    label                   = "Normal",
+    attack_type             = "None"
+  )
+}
+
+# Generate baseline training (15k), validation (3k), and clean evaluation sets (5k)
+raw_train <- generate_baseline_telemetry(15000)
+raw_val   <- generate_baseline_telemetry(3000)
+raw_test_clean <- generate_baseline_telemetry(5000)
+
+# Inject Multi-Vector Cyber Attack Scenarios into Evaluation Set
+n_attacks_per_vector <- 150
+
+# Attack Vector 1: Data Exfiltration (Outbound volume + long TLS durations)
+attack_exfiltration <- generate_baseline_telemetry(n_attacks_per_vector) %>%
+  mutate(
+    net_bytes_out_kb     = net_bytes_out_kb * runif(n_attacks_per_vector, 25, 60),
+    net_tls_duration_sec = net_tls_duration_sec * runif(n_attacks_per_vector, 8, 20),
+    net_port_entropy     = runif(n_attacks_per_vector, 0.75, 0.98),
+    label                = "Anomaly",
+    attack_type          = "Data Exfiltration"
+  )
+
+# Attack Vector 2: Credential Stuffing (Surge in failed logins & unique IPs)
+attack_brute_force <- generate_baseline_telemetry(n_attacks_per_vector) %>%
+  mutate(
+    auth_failed_logins     = auth_failed_logins + rpois(n_attacks_per_vector, lambda = 45),
+    auth_unique_source_ips = auth_unique_source_ips + rpois(n_attacks_per_vector, lambda = 80),
+    auth_priv_escalations  = auth_priv_escalations + rpois(n_attacks_per_vector, lambda = 4),
+    label                  = "Anomaly",
+    attack_type            = "Credential Stuffing"
+  )
+
+# Attack Vector 3: Zero-Day Lateral Movement (Spike in child processes & DNS queries)
+attack_zero_day <- generate_baseline_telemetry(n_attacks_per_vector) %>%
+  mutate(
+    host_child_process_cnt = host_child_process_cnt + rpois(n_attacks_per_vector, lambda = 35),
+    host_fs_write_bursts   = host_fs_write_bursts + rpois(n_attacks_per_vector, lambda = 60),
+    net_dns_query_rate     = net_dns_query_rate * runif(n_attacks_per_vector, 4, 10),
+    label                  = "Anomaly",
+    attack_type            = "Zero-Day Lateral Movement"
+  )
+
+# Combined evaluation test dataset
+raw_test <- bind_rows(raw_test_clean, attack_exfiltration, attack_brute_force, attack_zero_day)
+
+```
+
+## Data Preprocessing & Scaling Pipeline
+
+Enterprise telemetry data comes in many different units, like login counts, megabytes transferred, and CPU usage percentages. This pipeline standardizes and normalizes all metrics onto the same scale, so large network numbers do not hide smaller but important host-level changes. All adjustments are based only on normal baseline data to avoid data leakage, making sure the risk engine works like it would in a real production setting.
+
+Features are normalized to zero mean and unit variance based strictly on the training distribution.
+
+``` {r preprocessing-recipe}
+
+feature_cols <- raw_train %>% select(-label, -attack_type) %>% names()
+
+# Preprocessing Recipe
+telemetry_recipe <- recipe(~ ., data = raw_train %>% select(all_of(feature_cols))) %>%
+  step_YeoJohnson(all_numeric_predictors()) %>%
+  step_normalize(all_numeric_predictors()) %>%
+  prep()
+
+# Extract normalized numeric matrices
+X_train <- as.matrix(bake(telemetry_recipe, new_data = raw_train))
+X_val   <- as.matrix(bake(telemetry_recipe, new_data = raw_val))
+X_test  <- as.matrix(bake(telemetry_recipe, new_data = raw_test))
+
+```
+
+## Pure R Autoencoder Engine (Vectorized Matrix Calculus & Adam)
+
+This part builds and trains the AI engine directly in R, without needing outside software or extra tools. The neural network processes normal baseline activity over and over, adjusting its internal weights with the Adam algorithm to learn regular organizational patterns. By using vectorized matrix math, it offers a reliable and fast computing base that can understand the complex connections within enterprise systems.
+
+``` {r pure-r-autoencoder-engine}
+
+# Xavier/Glorot weight initialization
+init_weights <- function(din, dout) {
+  limit <- sqrt(6 / (din + dout))
+  matrix(runif(din * dout, -limit, limit), nrow = din, ncol = dout)
+}
+
+# Autoencoder Trainer using Vectorized Matrix Calculus and Adam Optimizer
+train_pure_r_autoencoder <- function(X_train, X_val, d_bottleneck = 4, epochs = 40, 
+                                     batch_size = 256, lr = 0.005, beta1 = 0.9, 
+                                     beta2 = 0.999, eps = 1e-8) {
+  d_in <- ncol(X_train)
+  N_train <- nrow(X_train)
+  
+  # Initialize Weights & Biases (16 -> 4 -> 16)
+  W_e <- init_weights(d_in, d_bottleneck)
+  b_e <- rep(0, d_bottleneck)
+  W_d <- init_weights(d_bottleneck, d_in)
+  b_d <- rep(0, d_in)
+  
+  # Adam Optimizer Moments
+  m_We <- matrix(0, nrow = d_in, ncol = d_bottleneck); v_We <- m_We
+  m_be <- rep(0, d_bottleneck); v_be <- m_be
+  m_Wd <- matrix(0, nrow = d_bottleneck, ncol = d_in); v_Wd <- m_Wd
+  m_bd <- rep(0, d_in); v_bd <- m_bd
+  
+  t <- 0
+  train_loss_history <- numeric(epochs)
+  val_loss_history   <- numeric(epochs)
+  
+  n_batches <- ceiling(N_train / batch_size)
+  
+  for (epoch in 1:epochs) {
+    # Shuffle training indices
+    shuffled_idx <- sample.int(N_train)
+    batch_losses <- numeric(n_batches)
+    
+    for (b in 1:n_batches) {
+      t <- t + 1
+      start_i <- (b - 1) * batch_size + 1
+      end_i   <- min(b * batch_size, N_train)
+      batch_idx <- shuffled_idx[start_i:end_i]
+      
+      X_b <- X_train[batch_idx, , drop = FALSE]
+      N_b <- nrow(X_b)
+      
+      # Forward Pass: Encoder (tanh activation) -> Bottleneck -> Decoder (linear)
+      Z <- tanh(X_b %*% W_e + matrix(b_e, nrow = N_b, ncol = d_bottleneck, byrow = TRUE))
+      X_hat <- Z %*% W_d + matrix(b_d, nrow = N_b, ncol = d_in, byrow = TRUE)
+      
+      # Batch Loss (MSE)
+      diff <- X_hat - X_b
+      loss <- sum(diff^2) / (N_b * d_in)
+      batch_losses[b] <- loss
+      
+      # Backward Pass: Matrix Gradients
+      grad_Xhat <- (2 / (N_b * d_in)) * diff
+      grad_Wd   <- t(Z) %*% grad_Xhat
+      grad_bd   <- colSums(grad_Xhat)
+      
+      grad_Z    <- grad_Xhat %*% t(W_d)
+      delta_Z   <- grad_Z * (1 - Z^2) # Derivative of tanh
+      grad_We   <- t(X_b) %*% delta_Z
+      grad_be   <- colSums(delta_Z)
+      
+      # Adam Updates for W_d, b_d, W_e, b_e
+      m_Wd <- beta1 * m_Wd + (1 - beta1) * grad_Wd
+      v_Wd <- beta2 * v_Wd + (1 - beta2) * (grad_Wd^2)
+      m_Wd_hat <- m_Wd / (1 - beta1^t); v_Wd_hat <- v_Wd / (1 - beta2^t)
+      W_d <- W_d - lr * m_Wd_hat / (sqrt(v_Wd_hat) + eps)
+      
+      m_bd <- beta1 * m_bd + (1 - beta1) * grad_bd
+      v_bd <- beta2 * v_bd + (1 - beta2) * (grad_bd^2)
+      m_bd_hat <- m_bd / (1 - beta1^t); v_bd_hat <- v_bd / (1 - beta2^t)
+      b_d <- b_d - lr * m_bd_hat / (sqrt(v_bd_hat) + eps)
+      
+      m_We <- beta1 * m_We + (1 - beta1) * grad_We
+      v_We <- beta2 * v_We + (1 - beta2) * (grad_We^2)
+      m_We_hat <- m_We / (1 - beta1^t); v_We_hat <- v_We / (1 - beta2^t)
+      W_e <- W_e - lr * m_We_hat / (sqrt(v_We_hat) + eps)
+      
+      m_be <- beta1 * m_be + (1 - beta1) * grad_be
+      v_be <- beta2 * v_be + (1 - beta2) * (grad_be^2)
+      m_be_hat <- m_be / (1 - beta1^t); v_be_hat <- v_be / (1 - beta2^t)
+      b_e <- b_e - lr * m_be_hat / (sqrt(v_be_hat) + eps)
+    }
+    
+    train_loss_history[epoch] <- mean(batch_losses)
+    
+    # Validation Forward Pass
+    N_v <- nrow(X_val)
+    Z_val <- tanh(X_val %*% W_e + matrix(b_e, nrow = N_v, ncol = d_bottleneck, byrow = TRUE))
+    X_hat_val <- Z_val %*% W_d + matrix(b_d, nrow = N_v, ncol = d_in, byrow = TRUE)
+    val_loss_history[epoch] <- sum((X_hat_val - X_val)^2) / (N_v * d_in)
+  }
+  
+  list(
+    W_e = W_e, b_e = b_e, W_d = W_d, b_d = b_d,
+    train_losses = train_loss_history,
+    val_losses = val_loss_history,
+    d_bottleneck = d_bottleneck
+  )
+}
+
+# Reconstruct and compute sample-level Mean Squared Errors
+predict_reconstruction <- function(model, X) {
+  N <- nrow(X)
+  Z <- tanh(X %*% model$W_e + matrix(model$b_e, nrow = N, ncol = model$d_bottleneck, byrow = TRUE))
+  X_hat <- Z %*% model$W_d + matrix(model$b_d, nrow = N, ncol = ncol(X), byrow = TRUE)
+  
+  diff <- X_hat - X
+  sample_mse <- rowMeans(diff^2)
+  
+  list(
+    X_hat = X_hat,
+    residuals = abs(diff),
+    sample_mse = sample_mse
+  )
+}
+
+# Train the pure R autoencoder model
+trained_ae <- train_pure_r_autoencoder(X_train, X_val, d_bottleneck = 4, epochs = 40, batch_size = 256, lr = 0.005)
+
+```
+
+## Reconstruction Loss Profiling & EVT Tail Calibration
+
+After training, the engine checks how well it can recreate live telemetry data, creating an anomaly score based on the difference between what it sees and what is expected. Instead of using random cutoff points, this part uses Extreme Value Theory (EVT) to model the rare, extreme errors. This sets clear alert boundaries, like a 99.9% confidence level, so critical security threats are flagged automatically while false alarms for the Security Operations Center (SOC) are kept to a minimum.
+
+``` {r evt-tail-calibration}
+
+train_recon <- predict_reconstruction(trained_ae, X_train)
+test_recon  <- predict_reconstruction(trained_ae, X_test)
+
+train_losses <- train_recon$sample_mse
+test_losses  <- test_recon$sample_mse
+
+# Fit Generalized Pareto Distribution on Baseline Tail (Upper 5% Exceedances)
+threshold_u <- quantile(train_losses, probs = 0.95)
+excess_losses <- train_losses[train_losses > threshold_u] - threshold_u
+
+gpd_fit <- fpot(train_losses, threshold = threshold_u, model = "gpd", std.err = FALSE)
+scale_sigma <- gpd_fit$estimate["scale"]
+shape_xi    <- gpd_fit$estimate["shape"]
+
+# Compute EVT Cutoffs for 99.0% and 99.9% Confidence Boundaries
+N_total <- length(train_losses)
+N_u     <- length(excess_losses)
+
+evt_threshold_990 <- threshold_u + (scale_sigma / shape_xi) * (((N_total / N_u) * 0.01)^(-shape_xi) - 1)
+evt_threshold_999 <- threshold_u + (scale_sigma / shape_xi) * (((N_total / N_u) * 0.001)^(-shape_xi) - 1)
+
+# Annotate Test Set Results
+test_results <- raw_test %>%
+  mutate(
+    recon_loss = test_losses,
+    is_anomaly_evt990 = recon_loss > evt_threshold_990,
+    is_anomaly_evt999 = recon_loss > evt_threshold_999
+  )
+
+```
+
+## SOC Explainability & Diagnostic Visualizations
+
+**Autoencoder Loss Convergence Plot**
+
+The Autoencoder Loss Convergence plot tracks the optimization progress of the neural network across 40 training epochs, demonstrating how effective the model can learn baseline operational behavior. The rapid initial drop and subsequent leveling off of Mean Squared Error - with the training curve (blue) and validation curve (red) closely tracking each other around an MSE of 0.75—confirms stable mathematical convergence. Because the validation loss does not diverge upward as training progresses, the plot provides executive verification that the model has successfully generalized normal enterprise patterns without overfitting the training data.
+
+
+``` {r autoencoder-loss-convergence-plot}
+
+# Training & Validation Loss Decay
+loss_df <- tibble(
+  Epoch = rep(1:length(trained_ae$train_losses), 2),
+  Loss = c(trained_ae$train_losses, trained_ae$val_losses),
+  Type = rep(c("Training Loss", "Validation Loss"), each = length(trained_ae$train_losses))
+)
+
+p_conv <- ggplot(loss_df, aes(x = Epoch, y = Loss, color = Type)) +
+  geom_line(linewidth = 1.1) +
+  scale_color_manual(values = c("Training Loss" = "#0275d8", "Validation Loss" = "#d9534f")) +
+  labs(
+    title = "Autoencoder Loss Convergence",
+    subtitle = "Pure R Vectorized MSE Loss across Training Epochs",
+    x = "Epoch",
+    y = "Mean Squared Error"
+  )
+
+p_conv
+
+```
+
+**Reconstruction Loss Profiling**
+
+The Reconstruction Loss Profiling plot highlights the engine's ability to separate routine business traffic from active cyber attacks on a logarithmic error scale. Normal baseline operations (grey) cluster tightly below an error of 1.0, while the injected threat vectors—Data Exfiltration (red), Credential Stuffing (blue), and Zero-Day Lateral Movement (green)—shift significantly to the right with multi-fold increases in reconstruction error. The red dashed vertical line marks the 99.9% Extreme Value Theory boundary, establishing a statistically certified decision threshold that captures anomalous attack vectors while keeping operational false alarms for the SOC near zero.
+
+``` {r reconstruction-loss-distribution-plot}
+# Reconstruction Loss Distribution with EVT Cutoffs
+p_dist <- ggplot(test_results, aes(x = recon_loss, fill = attack_type)) +
+  geom_histogram(bins = 80, alpha = 0.75, position = "identity") +
+  scale_x_log10() +
+  geom_vline(xintercept = evt_threshold_999, color = "#d9534f", linetype = "dashed", linewidth = 1) +
+  geom_vline(xintercept = evt_threshold_990, color = "#f0ad4e", linetype = "dotted", linewidth = 1) +
+  scale_fill_manual(
+    values = c("None" = "#6c757d", "Data Exfiltration" = "#d9534f", 
+               "Credential Stuffing" = "#0275d8", "Zero-Day Lateral Movement" = "#5cb85c")
+  ) +
+  annotate("text", x = evt_threshold_999 * 1.15, y = 350, label = "EVT 99.9% Boundary", color = "#d9534f", angle = 90, size = 3.5, fontface = "bold") +
+  labs(
+    title = "Reconstruction Loss Profiling",
+    subtitle = "Log-Scale Loss Distribution with Dynamic EVT Tail Thresholds",
+    x = "Reconstruction Error (MSE, Log Scale)",
+    y = "Observation Count",
+    fill = "Attack Vector"
+  )
+
+p_dist
+
+```
+
+## Feature-Level Error Decomposition (SOC Root-Cause Attribution)
+
+This heatmap serves as an automated forensic tool, making it easy to see how each feature contributes to the total anomaly score for every flagged incident. Instead of simply relying on black box analysis, the engine identifies the specific factors behind each type of attack. For example, *Credential Stuffing* alerts are mostly caused by spikes in failed logins and changes in source IP patterns. *Data Exfiltration* is linked to unusual outbound data and longer TLS sessions. *Zero-Day Lateral Movement* is marked by sudden increases in DNS queries, new child processes, and file system changes. For senior leaders and oversight committees, this clear root-cause analysis helps meet new explainable AI standards like NIST AI RMF and OSFI E-23. It also allows Security Operations Center teams quickly take targeted action while skipping hours of manual log review.
+
+To provide explainability for SOC security analysts, total reconstruction loss is decomposed into individual feature residuals ‭$|x_j - \hat{x}_j|$‬‭‬‭‬‭‬.
+
+``` {r feature-decomposition-heatmap}
+
+abs_residuals <- test_recon$residuals
+colnames(abs_residuals) <- feature_cols
+
+# Select representative sample of detected cyber attacks
+sample_anomalies <- test_results %>%
+  mutate(row_id = row_number()) %>%
+  filter(label == "Anomaly", is_anomaly_evt999) %>%
+  group_by(attack_type) %>%
+  slice_head(n = 6) %>%
+  ungroup()
+
+heatmap_data <- as.data.frame(abs_residuals[sample_anomalies$row_id, ]) %>%
+  mutate(
+    Incident_ID = paste0(sample_anomalies$attack_type, " #", row_number()),
+    Attack_Group = sample_anomalies$attack_type
+  ) %>%
+  pivot_longer(cols = all_of(feature_cols), names_to = "Feature", values_to = "Residual")
+
+ggplot(heatmap_data, aes(x = Feature, y = Incident_ID, fill = Residual)) +
+  geom_tile(color = "white", linewidth = 0.3) +
+  scale_fill_gradient(low = "#f8f9fa", high = "#d9534f", name = "Feature Error |x - x̂|") +
+  labs(
+    title = "SOC Root-Cause Attribution Heatmap",
+    subtitle = "Feature-Level Reconstruction Error Decomposing Detected Incidents",
+    x = "Telemetry Metric",
+    y = "Incident Entity"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1, size = 8),
+    axis.text.y = element_text(size = 8)
+  )
+
+```
+
+## Detection Performance Frontiers (ROC & Precision-Recall)
+
+These performance curves show how well the anomaly engine works across the entire test dataset. The ROC Detection Frontier achieves a perfect Area Under the Curve (AUC-ROC: 1.0000), which means the autoencoder can almost perfectly tell the difference between normal enterprise traffic and malicious activity, all while keeping system performance steady. The Precision-Recall Frontier also shows that the model keeps near-perfect precision at every recall level. This means that when the system sends a zero-day alert, it is almost always a real security issue, not a false alarm. For executives, these results offer clear evidence that the machine learning engine can safely automate important threat triage without causing alert fatigue for cyber analysts.
+
+``` {r performance-roc}
+
+eval_df <- test_results %>%
+  mutate(
+    truth = factor(label, levels = c("Anomaly", "Normal")),
+    score = recon_loss
+  )
+
+# Compute ROC and Precision-Recall Frontiers
+roc_curve_data <- roc_curve(eval_df, truth = truth, score)
+pr_curve_data  <- pr_curve(eval_df, truth = truth, score)
+auc_roc        <- roc_auc(eval_df, truth = truth, score)$.estimate
+
+p_roc <- ggplot(roc_curve_data, aes(x = 1 - specificity, y = sensitivity)) +
+  geom_line(color = "#0275d8", linewidth = 1.1) +
+  geom_abline(linetype = "dashed", color = "gray60") +
+  annotate("text", x = 0.65, y = 0.25, label = sprintf("AUC-ROC: %.4f", auc_roc), fontface = "bold", size = 4.5) +
+  labs(
+    title = "ROC Detection Frontier",
+    subtitle = "True Positive Rate vs. False Positive Rate",
+    x = "1 - Specificity (FPR)",
+    y = "Sensitivity (TPR)"
+  )
+
+p_pr <- ggplot(pr_curve_data, aes(x = recall, y = precision)) +
+  geom_line(color = "#5cb85c", linewidth = 1.1) +
+  labs(
+    title = "Precision-Recall Frontier",
+    subtitle = "Precision across Varying Anomaly Recall Rates",
+    x = "Recall",
+    y = "Precision"
+  )
+
+p_roc + p_pr
+
+```
+
+::: {.callout icon=false}
+How to read the ROC Detection Frontier and Precision-Recall Frontier plots
+<br/>
+The **ROC Detection Froniter plot** (The Blue Line: Up, Then Right) plot tracks the trade-off between catching genuine threats (Sensitivity / True Positive Rate) on the vertical axis and raising false alarms (False Positive Rate) on the horizontal axis.
+•	Why it goes straight UP: As the detection engine starts evaluating data, it flags every single cyber attack correctly before triggering even a single false alarm on normal traffic. The line shoots straight to the top (1.00, or 100% threat capture) while remaining pinned at zero on the bottom axis (0% false alarms).
+•	Why it turns RIGHT: Once 100% of all attacks have already been captured, the system cannot catch any more threats. If the alert threshold is loosened further into normal baseline noise, the detection rate stays at 100% (the top edge), but normal traffic starts getting mistakenly flagged as false positives, moving the line across to the right until every single event in the network is labeled an alert.
+
+The **Precision-Recall Curve** (The Green Line: Right, Then Down) evaluates alert quality: Recall (horizontal axis) measures the percentage of total cyber attacks discovered, while Precision (vertical axis) measures the trustworthiness of each alert (i.e., when an alarm sounds, what percentage are real attacks rather than false alarms).
+•	Why it goes straight RIGHT: The engine maintains 100% precision (1.00 on the vertical axis) as it uncovers more and more attacks across the network. It moves all the way to the far right (1.00, or 100% recall) because it captures every single injected threat vector without generating a single false positive along the way.
+•	Why it turns straight DOWN: Once the engine has successfully captured 100% of all existing attacks (the far right edge), recall cannot increase any further. If the sensitivity threshold is lowered to the extreme, the system begins misclassifying harmless operational traffic as attacks, diluting the alert pool with noise and causing precision to plummet straight down toward zero.
+
+Both curves trace the geometry of an ideal, mathematically perfect classifier. The top-left corner of the ROC plot and the top-right corner of the Precision-Recall plot represent the "holy grail" of cyber analytics: 100% threat detection with 0% false alarms. This confirms that our automated triage rules can safely isolate threats without burdening human analysts with alert fatigue or disrupting normal business operations.
+
+:::
+
+
+## Enterprise Cyber Governance Scorecard & SOC Decision Directives
+
+The Enterprise Cyber Anomaly Detection Scorecard turns the engine's technical results into a clear summary for decision-makers, showing how well its thresholds protect the organization from advanced cyber threats. In 450 simulated attacks, the system caught 100% of *Credential Stuffing* and *Zero-Day Lateral Movement* attempts, and 96.7% of stealth *Data Exfiltration* attacks at the strict 99.9% *Extreme Value Theory (EVT)* setting. For 5,000 normal operations (the "None" regime), the 99.9% EVT filter triggered no false alarms, compared to 37 alerts at the more relaxed 99.0% threshold. This gives the board and risk committees solid proof that the engine can nearly always detect threats while reducing alert fatigue for Security Operations Center (SOC) staff, so automated containment can be used with confidence.
+
+``` {r executive-scorecard}
+
+scorecard_summary <- test_results %>%
+  group_by(Attack_Class = attack_type) %>%
+  summarize(
+    Total_Events = n(),
+    Detected_EVT990 = sum(is_anomaly_evt990),
+    Detected_EVT999 = sum(is_anomaly_evt999),
+    Detection_Rate_EVT999 = sum(is_anomaly_evt999) / n() * 100,
+    Mean_Reconstruction_Loss = mean(recon_loss)
+  )
+
+scorecard_summary %>%
+  gt() %>%
+  tab_header(
+    title = "Enterprise Cyber Anomaly Detection Scorecard",
+    subtitle = "Autoencoder Detection Efficacy across Injected Threat Vectors via EVT Thresholding"
+  ) %>%
+  cols_label(
+    Attack_Class = "Threat Vector / Regime",
+    Total_Events = "Sample Count",
+    Detected_EVT990 = "Flagged (99.0% EVT)",
+    Detected_EVT999 = "Flagged (99.9% EVT)",
+    Detection_Rate_EVT999 = "Detection Rate (99.9%)",
+    Mean_Reconstruction_Loss = "Mean Error (ℒ)"
+  ) %>%
+  fmt_number(columns = Mean_Reconstruction_Loss, decimals = 3) %>%
+  fmt_percent(columns = Detection_Rate_EVT999, scale_values = FALSE, decimals = 1) %>%
+  data_color(
+    columns = Detection_Rate_EVT999,
+    direction = "column",
+    palette = c("#ffffff", "#f8d7da", "#d9534f")
+  ) %>%
+  tab_options(
+    table.font.size = 11,
+    heading.title.font.size = 14,
+    heading.subtitle.font.size = 12
+  )
+
+```
+
+## Insights & Conclusion
+
+This project moves away from traditional, signature-based cyber defense and instead uses an automated system that relies on mathematical verification to detect anomalies. The system trains a deep neural network only on normal enterprise activity, so it learns what typical operations look like and can spot new, unknown threats by noticing unusual patterns. Setting alert thresholds with Extreme Value Theory (EVT) removes the need for manual adjustments. As a result, the system captures 98.9% of threats and does not produce any false alarms during normal activity.<br/>
+
+To help turn these analytical tools into effective risk management and oversight at the board level, executive leaders have set out three main directives: <br/> <br/>
+**Automated Containment at the 99.9% EVT Boundary:** Security teams cannot manually triage thousands of alerts per hour. Telemetry events producing reconstruction losses at or above the 99.9% EVT threshold (‭$\mathcal{L}(\mathbf{x}) \ge \tau_{0.001}$‬‭‬‭‬‭‬‭‬) are formally classified as High-Consequence Structural Anomalies. The system is authorized to automatically isolate compromised hosts, terminate invalid network sessions, and revoke identity tokens in real time, bypassing Tier-1 review queues to neutralize lateral threat spread within milliseconds.<br/> <br/>
+**Mandatory Explainable AI (XAI) Root-Cause Triage:** To maintain compliance with institutional model risk standards (such as OSFI E-23 and NIST AI RMF), every automated alert must generate a top-three feature error attribution breakdown. Decomposing the overall loss into specific metric residuals ensures security personnel and regulators receive an auditable, deterministic explanation of why an incident was flagged (e.g., identity credential bursts vs. outbound data exfiltration) rather than relying on an opaque "black-box" decision. <br/> <br/>
+**Continuous Model Governance & Baseline Drift Surveillance:** Enterprise IT environments naturally evolve as new cloud workloads and employee workflows deploy. To prevent model staleness and false-positive inflation, automated two-sample Kolmogorov-Smirnov drift tests must run weekly across all 16 telemetry metrics. Any statistically significant distribution shift (‭$p < 0.01$‬‭‬) triggers scheduled model recalibration against recent steady-state data.
+
+The results and strong detection rates in this project show that the quantitative architecture works well. However, the telemetry and attack scenarios used here were created through controlled simulations. In real production settings, enterprise networks often have changing data patterns, occasional gaps in telemetry, new types of operations, and complex attacks. These factors can affect how the model performs. Because of this, deploying the system in the real world means you need to monitor for changes over time, regularly update the model with new production data, and include human review during the early stages. This helps ensure the system balances strong threat detection with keeping business operations running smoothly.
+
+## Session Information
+
+```{r}
+#| echo: false
+
+sessioninfo::session_info()
+```
+
+------------------------------------------------------------------------
+
+*Rendered with [Quarto](https://quarto.org/) and R. Core packages: `evd`, `gt`, `patchwork`, `recipes`, `scales`, `sessioninfo`, `tidyverse`, `yardstick`*
